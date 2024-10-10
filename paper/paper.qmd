@@ -1,11 +1,10 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "Popularity of Justin Bieber and Travis Scott"
 author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
-date: today
+  - Viet Nguyen
+  - Doran Wang
+  - Yihang Xu
+date: October 10, 2024
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
 format: pdf
@@ -20,63 +19,34 @@ bibliography: references.bib
 
 library(tidyverse)
 library(palmerpenguins)
+library(knitr)
 ```
 
-
 # Introduction
+This paper analyzes the popularity of songs by Justin Bieber and Travis Scott using data from Spotify. The music industry has shifted dramatically in recent years, with streaming platforms like Spotify playing a key role in determining an artist’s reach and influence. Justin Bieber and Travis Scott represent two distinct genres and musical trajectories, offering a compelling comparison of their popularity based on streaming data.
 
-Overview paragraph
+The goal of this study is to understand how each artist’s songs perform in terms of popularity. We analyze the popularity of individual tracks and look for trends across their discographies. By visualizing and comparing the popularity of songs from these two artists, we aim to identify patterns in their musical success and longevity.
 
-Estimand paragraph
+Understanding this data is important for gaining insights into the broader dynamics of the music industry, including factors that contribute to an artist’s sustained popularity. The findings could help predict future trends in music consumption and assist in marketing strategies for artists across genres.
 
-Results paragraph
+The remainder of this paper is structured as follows: In Section 2, we discuss the data and variables used in the analysis. Section 3 details the modeling approach. Section 4 presents the results, and in Section 5, we conclude with a discussion of the implications of our findings.
 
-Why it matters paragraph
-
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
-
-
-
-
-
-
-# Data {#sec-data}
-
-## Overview
-
-We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
-
-Overview text
-
-## Measurement
-	
-Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
-
-## Outcome variables
-
-Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
-
-
-
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
-
+# Data
+We used the data downloaded from spotify (@spotifyapi) and R (@citeR)
 ```{r}
 #| label: fig-bills
 #| fig-cap: Bills of penguins
 #| echo: false
+simulated_data <- read_rds(here::here("/Users/nguyenviet/Documents/spotify/data/01-raw_data/justin_bieber_top.rds"))
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
+ggplot(simulated_data, aes(x = reorder(name, -popularity), y = popularity)) +
+  geom_bar(stat = "identity", fill = "steelblue", color = "black") +
   theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+  coord_flip() +  # Flip coordinates for better readability of track names
+  labs(title = "Popularity of Tracks", x = "Track Name", y = "Popularity")
+
 ```
 
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
 
 ```{r}
 #| label: fig-planes
@@ -85,175 +55,68 @@ And also planes (@fig-planes). (You can change the height and width, but don't w
 #| warning: false
 #| message: false
 
-analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
+simulated_data1 <- read_rds(here::here("/Users/nguyenviet/Documents/spotify/data/01-raw_data/travis_scott_top.rds"))
 
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
+ggplot(simulated_data1, aes(x = reorder(name, -popularity), y = popularity)) +
+  geom_bar(stat = "identity", fill = "pink", color = "black") +
   theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
+  coord_flip() +  # Flip coordinates for better readability of track names
+  labs(title = "Popularity of Tracks", x = "Track Name", y = "Popularity")
 ```
 
-Talk way more about it. 
-
-## Predictor variables
-
-Add graphs, tables and text.
-
-Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
-
-
-
-
-
-
-
-
-# Model
-
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
-
-## Model set-up
-
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
-
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
-
-### Model justification
-
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
-
-# Results
-
-Our results are summarized in @tbl-modelresults.
 
 ```{r}
 #| echo: false
 #| eval: true
 #| warning: false
 #| message: false
+simulated_data2 <- read_rds(here::here("/Users/nguyenviet/Documents/spotify/data/01-raw_data/travis_scott.rds"))
+simulated_data2 <- simulated_data2 %>% mutate(artist_name = "Travis Scott")
 
-library(rstanarm)
+simulated_data3 <- read_rds(here::here("/Users/nguyenviet/Documents/spotify/data/01-raw_data/justin_bieber.rds"))
+simulated_data3 <- simulated_data3 %>% mutate(artist_name = "Justin Bieber")
 
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
-```
-
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
-
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
-
-
-
-
-# Discussion
-
-## First discussion point {#sec-first-point}
-
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-Please don't use these as sub-heading labels - change them to be what your point actually is.
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
-
-\newpage
-
-\appendix
-
-# Appendix {-}
-
-
-# Additional data details
-
-# Model details {#sec-model-details}
-
-## Posterior predictive check
-
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
-
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
-
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
+rbind(simulated_data2, simulated_data3) |>
+  select(artist_name, release_date, total_tracks) |>
+  mutate(release_date = ymd(release_date)) |> 
+  ggplot(aes( x = release_date, y = total_tracks, color = artist_name)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth() +
   theme_minimal() +
+  facet_wrap(facets = vars(artist_name), dir = "v") +
+  labs(
+    x = "release date",
+    y = "total_tracks",
+    color = "Artist"
+  ) +
   scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
+  theme(legend.position = "bottom")
 ```
 
-## Diagnostics
+# Discussions
+The analysis of Justin Bieber’s and Travis Scott’s popularity on Spotify reveals several key insights. First, Bieber’s music, spanning multiple albums and genres, shows consistent high popularity across a wide range of tracks. His collaboration-heavy tracks, particularly those featuring well-known artists, tend to rank highly, suggesting that collaborations may play a significant role in his sustained success. Meanwhile, Travis Scott’s discography reflects a distinct pattern, with a sharp increase in track popularity following the release of his more recent albums, indicating his growing prominence in the hip-hop genre.
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+The differences between Bieber and Scott’s popularity trends can be attributed to several factors, including their genre, target audience, and marketing strategies. Bieber’s mainstream appeal across pop and R&B genres contrasts with Scott’s niche within the hip-hop community, but Scott’s rising influence demonstrates how genre specialization can also lead to mainstream success. Additionally, release timing and the number of tracks per album appear to impact their overall popularity trends.
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
 
+# Appendix
+These are the sample variables we used from the data we downloaded.
 ```{r}
 #| echo: false
 #| eval: true
-#| message: false
 #| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
+#| message: false
+out <- simulated_data[c("name","popularity")]
+out2 <- simulated_data1[c("name","popularity")]
+out3 <- simulated_data2[c("total_tracks","release_date")]
+out4 <- simulated_data3[c("total_tracks","release_date")]
 
-plot(first_model, "trace")
+kable(head(out))
+kable(head(out2))
+kable(head(out3))
+kable(head(out4))
 
-plot(first_model, "rhat")
 ```
-
-
-
-\newpage
-
 
 # References
-
 
